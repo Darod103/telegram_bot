@@ -1,0 +1,4 @@
+/storage/mysql
+.idea/
+.env
+vendor/

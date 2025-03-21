@@ -1,0 +1,58 @@
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: config/nginx/Dockerfile
+    volumes:
+      - ./:/var/www/
+    ports:
+      - "${NGINX_PORT}:80"
+    restart: always
+    depends_on:
+      - php
+    networks:
+      - bot-network
+
+  mysql:
+    build:
+      context: .
+      dockerfile: config/mysql/Dockerfile
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ./storage/mysql/:/var/lib/mysql
+    networks:
+      - bot-network
+
+  php:
+    build:
+      context: .
+      dockerfile: config/php/Dockerfile
+    volumes:
+      - ./:/var/www
+    restart: always
+    depends_on:
+      - mysql
+    networks:
+      - bot-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 700M
+    ports:
+      - "${MY_ADMIN_PORT}:80"
+    depends_on:
+      - mysql
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge
