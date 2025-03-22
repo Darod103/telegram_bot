@@ -1,4 +1,10 @@
-/storage/mysql
+storage/mysql/
 .idea/
 .env
 vendor/
+composer.lock
+todoForMe.txt
+logs/
+
+certbot/conf/
+certbot/www/
