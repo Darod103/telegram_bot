@@ -11,7 +11,8 @@
             "App\\Services\\": "src/app/Services",
             "App\\Controllers\\": "src/app/Controllers",
             "App\\Models\\": "src/app/Models",
-            "App\\Core\\": "src/app/Core"
+            "App\\Core\\": "src/app/Core",
+            "App\\Router\\": "src/app/Router"
         }
     }
 }

@@ -2,26 +2,10 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use TelegramBot\Api\Client;
+use App\Router\Router;
 use App\Services\EnvServices;
-use App\Core\Database;
+use App\Controller\UserController;
 
-$pdo = Database::connect();
-$stmt = $pdo->query("SHOW TABLES");
-$tables = $stmt->fetchAll();
-
-var_dump($tables);
-
-
-
-// $bot = new Client(EnvServices::getByKey('TELEGRAM_BOT_TOKEN'));
-
-// $bot->on(function ($update) use ($bot) {
-//     $message = $update->getMessage();
-//     if ($message) {
-//         $chatId = $message->getChat()->getId();
-//         $name = $message->getFrom()->getUsername() ?? 'пользователь';
-//         $bot->sendMessage($chatId, "Бот тебя слышит, ${name}!");
-//     }
-// }, fn () => true);
-
-// $bot->run();
+$bot = new Client(EnvServices::getByKey('TELEGRAM_BOT_TOKEN'));
+$router = new Router($bot);
+$router->command('/start', [UserController::class, 'handle']);
