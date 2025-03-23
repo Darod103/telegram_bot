@@ -27,7 +27,8 @@ class EnvServices
             return;
         }
 
-        $filePath = __DIR__ . '/../../.env';
+        $filePath = dirname(__DIR__, 3) . '/.env';
+
 
         if (!file_exists($filePath)) {
             self::$env = [];

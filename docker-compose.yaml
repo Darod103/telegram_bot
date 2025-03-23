@@ -1,74 +1,55 @@
+version: '3'
 services:
+
   nginx:
-    build:
-      context: ./config/nginx
-      dockerfile: Dockerfile
-    volumes:
-      - ./src:/var/www/html
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/html
+    image: nginx:1.23-alpine
+    restart: unless-stopped
     ports:
-      - "${NGINX_PORT}:80"
+      - "80:80"
       - "443:443"
-    restart: always
-    depends_on:
-      - php
-    networks:
-      - bot-network
-
-  mysql:
-    build:
-      context: ./config/mysql
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "${MYSQL_PORT}:3306"
     volumes:
-      - ./storage/mysql:/var/lib/mysql
-    networks:
-      - bot-network
-
-  php:
-    build:
-      context: ./config/php
-      dockerfile: Dockerfile
-    volumes:
-      - ./src:/var/www/html
-    restart: always
-    depends_on:
-      - mysql
-    networks:
-      - bot-network
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    restart: always
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      UPLOAD_LIMIT: 700M
-    ports:
-      - "${MY_ADMIN_PORT}:80"
-    depends_on:
-      - mysql
-    networks:
-      - bot-network
+      - ./public:/var/www/public
+      - ./config/nginx.localhost:/etc/nginx/conf.d #раскомментируйте эту строку, если certbot генерирует сертификат в первый раз, и запустите ./init-letsencrypt.sh
+      #- ./config/nginx:/etc/nginx/conf.d #раскомментируйте эту строку после того, как certbot сгенерирует сертификат, и закомментируйте строку выше.З атем run docker-compose up/docker-compose up -d
+      - ./config/certbot/conf:/etc/letsencrypt
+      - ./config/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
     image: certbot/certbot
+    restart: unless-stopped
     volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/html
-    entrypoint: >
-      sh -c "certbot certonly --webroot -w /var/www/html
-      --email you@example.com
-      -d yourdomen.ru 
-      --agree-tos --non-interactive"
+      - ./config/certbot/conf/:/etc/letsencrypt
+      - ./config/certbot/logs/:/var/log/letsencrypt
+      - ./config/certbot/www:/var/www/certbot
     depends_on:
       - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-networks:
-  bot-network:
-    driver: bridge
+  php:
+    build:
+      context: .
+      dockerfile: ./config/php/Dockerfile
+    volumes:
+      - .:/var/www
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=telegram_bot
+    volumes:
+      - "./storage/mysql:/var/lib/mysql"
+      - "./config/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro"
+
+
+volumes:
+  mysql_data: { driver: local }
