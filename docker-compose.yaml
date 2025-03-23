@@ -12,6 +12,7 @@ services:
       - ./config/nginx:/etc/nginx/conf.d #раскомментируйте эту строку после того, как certbot сгенерирует сертификат, и закомментируйте строку выше.З атем run docker-compose up/docker-compose up -d
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+      
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
@@ -31,6 +32,8 @@ services:
       dockerfile: ./config/php/Dockerfile
     volumes:
       - .:/var/www
+      - ./logs:/var/www/logs 
+    working_dir: /var/www
     restart: unless-stopped
     ports:
       - "9000:9000"

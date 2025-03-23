@@ -15,3 +15,5 @@ RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-enable opcache \
   && docker-php-source delete \
   && apk del .build-deps
+
+  WORKDIR /var/www
