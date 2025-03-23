@@ -45,8 +45,8 @@ services:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_DATABASE=telegram_bot
     volumes:
       - "./storage/mysql:/var/lib/mysql"

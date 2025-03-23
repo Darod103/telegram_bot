@@ -2,12 +2,16 @@
     "name": "darod/telegram-bot",
     "description": "A simple Telegram bot",
     "require": {
-        "telegram-bot/api": "^2.5"
+        "telegram-bot/api": "^2.5",
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
             "App\\": "src/app/",
-            "App\\Services\\": "src/app/Services"
+            "App\\Services\\": "src/app/Services",
+            "App\\Controllers\\": "src/app/Controllers",
+            "App\\Models\\": "src/app/Models",
+            "App\\Core\\": "src/app/Core"
         }
     }
 }
