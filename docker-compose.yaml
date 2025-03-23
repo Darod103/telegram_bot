@@ -1,4 +1,3 @@
-version: '3'
 services:
 
   nginx:
@@ -9,19 +8,19 @@ services:
       - "443:443"
     volumes:
       - ./public:/var/www/public
-      - ./config/nginx.localhost:/etc/nginx/conf.d #раскомментируйте эту строку, если certbot генерирует сертификат в первый раз, и запустите ./init-letsencrypt.sh
-      #- ./config/nginx:/etc/nginx/conf.d #раскомментируйте эту строку после того, как certbot сгенерирует сертификат, и закомментируйте строку выше.З атем run docker-compose up/docker-compose up -d
-      - ./config/certbot/conf:/etc/letsencrypt
-      - ./config/certbot/www:/var/www/certbot
+      # - ./config/nginx.localhost:/etc/nginx/conf.d #раскомментируйте эту строку, если certbot генерирует сертификат в первый раз, и запустите ./init-letsencrypt.sh
+      - ./config/nginx:/etc/nginx/conf.d #раскомментируйте эту строку после того, как certbot сгенерирует сертификат, и закомментируйте строку выше.З атем run docker-compose up/docker-compose up -d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
     image: certbot/certbot
     restart: unless-stopped
     volumes:
-      - ./config/certbot/conf/:/etc/letsencrypt
-      - ./config/certbot/logs/:/var/log/letsencrypt
-      - ./config/certbot/www:/var/www/certbot
+      - ./certbot/conf/:/etc/letsencrypt
+      - ./certbot/logs/:/var/log/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - nginx
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

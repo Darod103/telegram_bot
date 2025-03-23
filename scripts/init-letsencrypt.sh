@@ -5,11 +5,11 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.org www.example.org)
+domains=(telephp.ru ) #указать валидный url
 rsa_key_size=4096
-data_path="./config/certbot"
-email="youremail@xxx.com" # Домен для получения уведомлений о продлении сертификата
-staging=0 # поставка 1 включает тестовый режим, не отправляет запросы на получение сертификата, а только проверяет конфигурацию
+data_path="./certbot"
+email="darod103@gmail.com" # Рекомендауеться добавить валидную почту
+staging=0 # Установить 1, для теста 0 для получения сертификата
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
