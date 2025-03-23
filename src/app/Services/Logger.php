@@ -9,8 +9,9 @@ namespace App\Services;
  */
 class Logger
 {
-    private static string $logFilePath = __DIR__ . '/../../logs/app.log';
 
+    private static string $logFilePath = __DIR__ . '/../../../logs/app.log';
+    
     /**
      * Логирует сообщение об ошибке.
      *
