@@ -4,21 +4,18 @@ namespace App\Router;
 
 use App\Services\Logger;
 use TelegramBot\Api\Client;
-use TelegramBot\Api\Types\Update;
-
+use TelegramBot\Api\Types\Message;
 
 /**
  * Class Router
  *
- * Класс маршрутизации для обработки входящих команд от Telegram.
- *
- * @package App\Router
+ * Упрощённый маршрутизатор Telegram-команд.
  */
 class Router
 {
     private Client $bot;
     private array $commands = [];
-    private ?array $fallback = null;
+    private ?array $onText = null;
 
     public function __construct(Client $bot)
     {
@@ -26,10 +23,10 @@ class Router
     }
 
     /**
-     * Регистрация команды.
+     * Регистрирует команду.
+     *
      * @param string $name
-     * @param array $handler
-     * @return void
+     * @param array $handler [ControllerClass, method]
      */
     public function command(string $name, array $handler): void
     {
@@ -37,51 +34,46 @@ class Router
     }
 
     /**
-     * Обработчик на любое сообщение, если команды не сработали.
+     * Обработчик для  (любой текст).
+     *
      * @param array $handler
-     * @return void
      */
-    public function fallback(array $handler): void
+    public function onText(array $handler): void
     {
-        $this->fallback = $handler;
+        $this->onText = $handler;
     }
 
     /**
-     * Запуск маршрутизатора.
-     * @return void
+     * Запуск обработчиков.
      */
     public function run(): void
     {
         foreach ($this->commands as $command => $handler) {
-            $this->bot->command($command, function (Update $update) use ($handler) {
-                $this->invoke($handler, $update);
+            $this->bot->command($command, function (Message $message) use ($handler, $command) {
+                $this->invoke($handler, $message);
             });
         }
 
-        if ($this->fallback) {
-            $this->bot->on(function (Update $update) {
-                $this->invoke($this->fallback, $update);
-            }, fn() => true);
+        if ($this->onText) {
+            $this->bot->on(function (Message $message) {
+                $this->invoke($this->onText, $message);
+            }, fn () => true);
         }
+        $this->bot->run();
     }
 
     /**
-     * Вызов метода контроллера.
-     * @param array $handler
-     * @param Update $update
-     * @return void
+     * Вызов контроллера.
      */
-    private function invoke(array $handler, Update $update): void
+    private function invoke(array $handler, Message $message): void
     {
         [$class, $method] = $handler;
-        $instance = new $class();
-        if (method_exists($instance, $method)) {
-            $instance->$method($update, $this->bot);
+        $controller = new $class();
+
+        if (method_exists($controller, $method)) {
+            $controller->$method($message, $this->bot);
         } else {
-            Logger::error("Метод $method не найден в классе $class", [
-                'class' => $class,
-                'method' => $method
-            ]);
+            Logger::error("Метод $method не найден в $class");
         }
     }
 }

@@ -3,23 +3,16 @@
 namespace App\Controller;
 
 use TelegramBot\Api\Client;
-use TelegramBot\Api\Types\Update;
+use TelegramBot\Api\Types\Message;
 
-/**
- * Class UserController
- *
- * Контроллер для обработки команд пользователей.
- *
- * @package App\Controller
- */
 class UserController
 {
-    public function handle(Update $update, Client $bot):void
+    public function handle(Message $message, Client $bot): void
     {
-        $chatId = $update->getMessage()->getChat()->getId();
-        $userName = $update->getMessage()->getFrom()->getUsername();
-        $text = "👋 Привет, $userName!\nЭто тестовый контроллер.\nБот работает!";
+        $chatId = $message->getChat()->getId();
+        $name = $message->getFrom()->getUsername() ?? 'пользователь';
+
+        $text = "Привет, $name! Всё работает 👌";
         $bot->sendMessage($chatId, $text);
     }
-
 }
