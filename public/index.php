@@ -24,8 +24,8 @@ try {
 
     
     $router->command('start', [StartController::class, 'handle']);
-    $router->text([MessageController::class, 'handle']);
     $router->command('info', [InfoController::class, 'handle']);
+    $router->text([MessageController::class, 'handle']);
     $router->callback([BalanceController::class, 'show']);
 
     $router->run();
