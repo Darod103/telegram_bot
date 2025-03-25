@@ -7,8 +7,21 @@ use App\Services\ButtonService;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
 
+/**
+ * Контроллер для обработки команды /start.
+ *
+ * Этот контроллер отвечает за приветственное сообщение и регистрацию нового пользователя.
+ */
 class StartController
 {
+    /**
+     * Метод для обработки команды /start.
+     * Выводит приветственное сообщение и информацию о регистрации.
+     *
+     * @param Message $message
+     * @param Client $bot
+     * @return void
+     */
     public function handle(Message $message, Client $bot): void
     {
         $chatId = $message->getChat()->getId();

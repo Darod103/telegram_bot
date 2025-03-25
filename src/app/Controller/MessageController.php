@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
-use App\Services\Logger;
 use App\Model\User;
 
 class MessageController
