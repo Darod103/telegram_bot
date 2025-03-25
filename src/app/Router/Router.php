@@ -2,20 +2,20 @@
 
 namespace App\Router;
 
-use App\Services\Logger;
 use TelegramBot\Api\Client;
+use TelegramBot\Api\Types\Update;
 use TelegramBot\Api\Types\Message;
+use TelegramBot\Api\Types\CallbackQuery;
+use App\Services\Logger;
 
 /**
  * Class Router
  *
- * Упрощённый маршрутизатор Telegram-команд.
+ * Маршрутизатор Telegram-команд .
  */
 class Router
 {
-    private Client $bot;
-    private array $commands = [];
-    private ?array $onText = null;
+    protected Client $bot;
 
     public function __construct(Client $bot)
     {
@@ -23,57 +23,64 @@ class Router
     }
 
     /**
-     * Регистрирует команду.
-     *
-     * @param string $name
-     * @param array $handler [ControllerClass, method]
+     * Регистрация команды.
      */
-    public function command(string $name, array $handler): void
+    public function command(string $name, callable|array $handler): void
     {
-        $this->commands[ltrim($name, '/')] = $handler;
+        $this->bot->command($name, function (Message $message) use ($handler, $name) {
+            $this->invoke($handler, $message);
+        });
     }
 
     /**
-     * Обработчик для текстовых сообщений(любой текст).
-     *
-     * @param array $handler
+     * Обработка любого текстового сообщения (не команды).
      */
-    public function onText(array $handler): void
+    public function text(callable|array $handler): void
     {
-        $this->onText = $handler;
+        $this->bot->on(function (Update $update) use ($handler) {
+            $message = $update->getMessage();
+            $this->invoke($handler, $message);
+        }, fn(Update $update) => $update->getMessage()?->getText() !== null);
     }
 
     /**
-     * Запуск обработчиков.
+     * Обработка callback-кнопок.
+     */
+    public function callback(callable|array $handler): void
+    {
+        $this->bot->callbackQuery(function (CallbackQuery $callbackQuery) use ($handler) {
+            $this->invoke($handler, $callbackQuery);
+        });
+    }
+
+    /**
+     * Вызов обработчика.
+     */
+    protected function invoke(callable|array $handler, Message|CallbackQuery $entity): void
+    {
+        try {
+            if (is_array($handler)) {
+                [$class, $method] = $handler;
+                $instance = is_string($class) ? new $class() : $class;
+                $instance->$method($entity, $this->bot);
+            } else {
+                $handler($entity, $this->bot);
+            }
+        } catch (\Throwable $e) {
+            Logger::error("Ошибка обработки запроса", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Запуск роутера.
      */
     public function run(): void
     {
-        foreach ($this->commands as $command => $handler) {
-            $this->bot->command($command, function (Message $message) use ($handler, $command) {
-                $this->invoke($handler, $message);
-            });
-        }
-
-        if ($this->onText) {
-            $this->bot->on(function (Message $message) {
-                $this->invoke($this->onText, $message);
-            }, fn () => true);
-        }
         $this->bot->run();
-    }
-
-    /**
-     * Вызов контроллера.
-     */
-    private function invoke(array $handler, Message $message): void
-    {
-        [$class, $method] = $handler;
-        $controller = new $class();
-
-        if (method_exists($controller, $method)) {
-            $controller->$method($message, $this->bot);
-        } else {
-            Logger::error("Метод $method не найден в $class");
-        }
     }
 }

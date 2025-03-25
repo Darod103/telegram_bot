@@ -1,24 +1,23 @@
 <?php
 
 namespace App\Controller;
-use App\Model\User;
+
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
+use App\Services\Logger;
 
-/**
- * Class MessageController
- *
- * Контроллер для обработки сообщений.
- */
 class MessageController
 {
-    public function handel(Message $message, Client $bot):void
+    public function handle(Message $message, Client $bot): void
     {
-        $text = trim($message->getText());
+        Logger::info('MessageController сработал', ['text' => $message->getText()]);
+        
         $chatId = $message->getChat()->getId();
-        if(is_numeric(str_replace(',','.',$text))){
+        $text = str_replace(' ','',$message->getText());
+        
+        if (is_numeric(str_replace(',', '.', $text))) {
             $bot->sendMessage($chatId, "Вы ввели число: $text");
-        }else{
+        } else {
             $bot->sendMessage($chatId, "Вы ввели текст: $text");
         }
     }
