@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+use App\Controller\BalanceController;
 use TelegramBot\Api\Client;
 use App\Router\Router;
 use App\Controller\StartController;
@@ -23,6 +24,7 @@ try {
     
     $router->command('start', [StartController::class, 'handle']);
     $router->text([MessageController::class, 'handle']);
+    $router->callback([BalanceController::class, 'show']);
 
     $router->run();
 

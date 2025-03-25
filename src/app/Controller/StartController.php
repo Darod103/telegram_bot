@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Model\User;
+use App\Services\ButtonService;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
 
@@ -30,6 +31,6 @@ HTML;
             return;
         }
         $text = "👋 Привет  $name! Всё работает 👌";
-        $bot->sendMessage($chatId, $text);
+        $bot->sendMessage($chatId, $text, 'HTML',false,null,ButtonService::balanceButton());
     }
 }
