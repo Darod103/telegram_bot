@@ -6,6 +6,6 @@ USE telegram_bot;
 CREATE TABLE IF NOT EXISTS `users` (
                                        `id` INT NOT NULL AUTO_INCREMENT,
                                        `telegram_id` BIGINT UNIQUE NOT NULL,
-                                       `balance` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                                       `balance` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
                                        PRIMARY KEY (`id`)
 );

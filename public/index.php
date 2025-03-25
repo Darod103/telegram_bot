@@ -8,6 +8,10 @@ use App\Controller\MessageController;
 use App\Services\EnvServices;
 use App\Services\Logger;
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    header('Location: '.EnvServices::getByKey('TELEGRAM_BOT_LINK'), true, 302);
+    exit;
+}
 
 try {
     
