@@ -5,10 +5,10 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.org ) #указать валидный url
+domains=(telephp.ru ) #указать валидный url
 rsa_key_size=4096
 data_path="./certbot"
-email="example@gmail.com" # Рекомендауеться добавить валидную почту
+email="darod103@gmail.com" # Рекомендауеться добавить валидную почту
 staging=0 # Установить 1, для теста 0 для получения сертификата
 
 if [ -d "$data_path" ]; then
