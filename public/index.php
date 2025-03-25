@@ -3,7 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use TelegramBot\Api\Client;
 use App\Router\Router;
-use App\Controller\UserController;
+use App\Controller\StartController;
 use App\Controller\MessageController;
 use App\Services\EnvServices;
 use App\Services\Logger;
@@ -21,7 +21,7 @@ try {
     $router = new Router($bot);
 
     
-    $router->command('start', [UserController::class, 'handle']);
+    $router->command('start', [StartController::class, 'handle']);
     $router->text([MessageController::class, 'handle']);
 
     $router->run();
